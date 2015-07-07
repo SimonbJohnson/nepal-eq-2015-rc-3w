@@ -25,6 +25,8 @@ function generate3WComponent(config,data,geom){
     $('#title').html(config.title);
     $('#description').html(config.description);
 
+    var lookup = genLookup(geom,config);
+
     var whoChart = dc.rowChart('#rc-3W-who');
     var whatChart = dc.rowChart('#rc-3W-what');
     var statusChart = dc.pieChart('#rc-3W-status');
@@ -126,7 +128,14 @@ function generate3WComponent(config,data,geom){
                 'opacity':0.1,
                 'fillOpacity': 0,
                 'weight': 1
+            }).renderlet(function(e){
+                var html = "";
+                e.filters().forEach(function(l){
+                    html += lookup[l]+", ";
+                });
+                $('#mapfilter').html(html);
             });
+
 
     dc.dataTable("#data-table")
                 .dimension(whoDimension)                
@@ -157,8 +166,7 @@ function generate3WComponent(config,data,geom){
                                                                 return "No"
                                                             }
                                                         }
-                ]);            
-
+                ])
     dc.renderAll();
     
     var map = whereChart.map();
