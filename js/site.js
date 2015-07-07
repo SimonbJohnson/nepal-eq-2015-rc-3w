@@ -2,16 +2,16 @@
 
 var config = {
     title:"Nepal Earthquake RC Recovery 3W",
-    description:"<p>Click the graphs or map to interact. - Date: 27/05/2015",
+    description:"<p>Click the graphs or map to interact. - Date: 06/07/2015",
     data:"data/data.json",
-    whoFieldName:"Society",
-    whatFieldName:"Activity",
-    whereFieldName:"vdc_pcode",
-    statusFieldName:"Confirmed",
-    priorityFieldName:"Priority",
-    geo:"data/nepal_adm4_with_dis.json",
+    whoFieldName:"#org",
+    whatFieldName:"#sector",
+    whereFieldName:"#adm3+code",
+    statusFieldName:"#indicator",
+    //priorityFieldName:"Priority",
+    geo:"data/nepal_adm3.json",
     joinAttribute:"HLCIT_CODE",
-    nameAttribute:"VDC_NAME",
+    nameAttribute:"DISTRICT",
     color:"#03a9f4"
 };
 
@@ -27,7 +27,7 @@ function generate3WComponent(config,data,geom){
     var whoChart = dc.rowChart('#rc-3W-who');
     var whatChart = dc.rowChart('#rc-3W-what');
     var statusChart = dc.pieChart('#rc-3W-status');
-    var priorityChart = dc.pieChart('#rc-3W-priority');
+    //var priorityChart = dc.pieChart('#rc-3W-priority');
     var whereChart = dc.leafletChoroplethChart('#rc-3W-where');
 
     var cf = crossfilter(data);
@@ -35,13 +35,13 @@ function generate3WComponent(config,data,geom){
     var whoDimension = cf.dimension(function(d){ return d[config.whoFieldName]; });
     var whatDimension = cf.dimension(function(d){ return d[config.whatFieldName]; });
     var statusDimension = cf.dimension(function(d){ return d[config.statusFieldName]; });
-    var priorityDimension = cf.dimension(function(d){ return d[config.priorityFieldName]; });
+    //var priorityDimension = cf.dimension(function(d){ return d[config.priorityFieldName]; });
     var whereDimension = cf.dimension(function(d){ return d[config.whereFieldName]; });
     
     var whoGroup = whoDimension.group();
     var whatGroup = whatDimension.group();
     var statusGroup = statusDimension.group();
-    var priorityGroup = priorityDimension.group();
+    //var priorityGroup = priorityDimension.group();
     var whereGroup = whereDimension.group();
     var all = cf.groupAll();
 
@@ -73,14 +73,13 @@ function generate3WComponent(config,data,geom){
             .dimension(statusDimension)
             .group(statusGroup)
             .colors([config.color,'#06b9f9'])
-            .colorAccessor(function(d, i){return i;})
-            .filter(["Yes"]);
+            .colorAccessor(function(d, i){return i;});
 
-    priorityChart.width($('#rc-3W-priority').width()).height(170)
-            .dimension(priorityDimension)
-            .group(priorityGroup)
-            .colors([config.color,'#06b9f9'])
-            .colorAccessor(function(d, i){return i;}); 
+    //priorityChart.width($('#rc-3W-priority').width()).height(170)
+    //        .dimension(priorityDimension)
+    //        .group(priorityGroup)
+    //        .colors([config.color,'#06b9f9'])
+    //        .colorAccessor(function(d, i){return i;}); 
 
     dc.dataCount('#count-info')
             .dimension(cf)
@@ -114,6 +113,30 @@ function generate3WComponent(config,data,geom){
                 'fillOpacity': 0,
                 'weight': 1
             });
+
+dc.dataTable("#data-table")
+                .dimension(whoDimension)                
+                .group(function (d) {
+                    return d['#adm3+name'];
+                })
+                .size(650)
+                .columns([
+                    function(d){
+                       return d['#adm3']; 
+                    },
+                    function(d){
+                       return d['#sector']; 
+                    },
+                    function(d){
+                       return d['#org']; 
+                    },
+                    function(d){
+                       return d['#adm4']; 
+                    },
+                    function(d){
+                       return d['#indicator']; 
+                    }
+                ]);            
 
     dc.renderAll();
     
@@ -172,7 +195,7 @@ var geomCall = $.ajax({
 //when both ready construct 3W
 
 $.when(dataCall, geomCall).then(function(dataArgs, geomArgs){
-    var geom = topojson.feature(geomArgs[0],geomArgs[0].objects.nepal_adm4_with_dis);
+    var geom = topojson.feature(geomArgs[0],geomArgs[0].objects.nepal_adm3);
     geom.features.forEach(function(e){
         e.properties[config.joinAttribute] = String(e.properties[config.joinAttribute]); 
     });
