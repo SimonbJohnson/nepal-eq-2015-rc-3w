@@ -8,11 +8,12 @@ var config = {
     whatFieldName:"#sector",
     whereFieldName:"#adm3+code",
     statusFieldName:"#indicator",
-    //priorityFieldName:"Priority",
+    districtlevelFieldName:"#meta+vdc_list",
     geo:"data/nepal_adm3.json",
     joinAttribute:"HLCIT_CODE",
     nameAttribute:"DISTRICT",
-    color:"#03a9f4"
+    color:"#03a9f4",
+    colors:["#DDDDDD","#E1F5FE","#81D4FA","#29B6F6","#039BE5","#0277BD"]
 };
 
 //function to generate the 3W component
@@ -27,7 +28,7 @@ function generate3WComponent(config,data,geom){
     var whoChart = dc.rowChart('#rc-3W-who');
     var whatChart = dc.rowChart('#rc-3W-what');
     var statusChart = dc.pieChart('#rc-3W-status');
-    //var priorityChart = dc.pieChart('#rc-3W-priority');
+    var districtlevelChart = dc.pieChart('#rc-3W-districtlevel');
     var whereChart = dc.leafletChoroplethChart('#rc-3W-where');
 
     var cf = crossfilter(data);
@@ -35,13 +36,18 @@ function generate3WComponent(config,data,geom){
     var whoDimension = cf.dimension(function(d){ return d[config.whoFieldName]; });
     var whatDimension = cf.dimension(function(d){ return d[config.whatFieldName]; });
     var statusDimension = cf.dimension(function(d){ return d[config.statusFieldName]; });
-    //var priorityDimension = cf.dimension(function(d){ return d[config.priorityFieldName]; });
+    var districtlevelDimension = cf.dimension(function(d){ if(d[config.districtlevelFieldName]=="No"){
+                                                                return "Yes";
+                                                            } else {
+                                                                return "No"
+                                                            }
+                                                        });
     var whereDimension = cf.dimension(function(d){ return d[config.whereFieldName]; });
     
     var whoGroup = whoDimension.group();
     var whatGroup = whatDimension.group();
     var statusGroup = statusDimension.group();
-    //var priorityGroup = priorityDimension.group();
+    var districtlevelGroup = districtlevelDimension.group();
     var whereGroup = whereDimension.group();
     var all = cf.groupAll();
 
@@ -75,11 +81,11 @@ function generate3WComponent(config,data,geom){
             .colors([config.color,'#06b9f9'])
             .colorAccessor(function(d, i){return i;});
 
-    //priorityChart.width($('#rc-3W-priority').width()).height(170)
-    //        .dimension(priorityDimension)
-    //        .group(priorityGroup)
-    //        .colors([config.color,'#06b9f9'])
-    //        .colorAccessor(function(d, i){return i;}); 
+    districtlevelChart.width($('#rc-3W-districtlevel').width()).height(170)
+            .dimension(districtlevelDimension)
+            .group(districtlevelGroup)
+            .colors([config.color,'#06b9f9'])
+            .colorAccessor(function(d, i){return i;}); 
 
     dc.dataCount('#count-info')
             .dimension(cf)
@@ -91,14 +97,22 @@ function generate3WComponent(config,data,geom){
             .center([0,0])
             .zoom(0)    
             .geojson(geom)
-            .colors(['#DDDDDD', config.color])
-            .colorDomain([0, 1])
+            .colors(config.colors)
+            .colorDomain([0, 5])
             .colorAccessor(function (d) {
-                if(d>0){
-                    return 1;
-                } else {
-                    return 0;
-                }
+                var c=0;
+                if(d>100){
+                    c=5;
+                } else if (d>50) {
+                    c=4;
+                } else if (d>25) {
+                    c=3;
+                } else if (d>10) {
+                    c=2;
+                }  else if (d>0) {
+                    c=1;
+                } 
+                return c;
             })           
             .featureKeyAccessor(function(feature){
                 return feature.properties[config.joinAttribute];
@@ -114,7 +128,7 @@ function generate3WComponent(config,data,geom){
                 'weight': 1
             });
 
-dc.dataTable("#data-table")
+    dc.dataTable("#data-table")
                 .dimension(whoDimension)                
                 .group(function (d) {
                     return d['#adm3+name'];
@@ -135,13 +149,20 @@ dc.dataTable("#data-table")
                     },
                     function(d){
                        return d['#indicator']; 
-                    }
+                    },
+                    function(d){
+                        if(d[config.districtlevelFieldName]=="No"){
+                                                                return "Yes";
+                                                            } else {
+                                                                return "No"
+                                                            }
+                                                        }
                 ]);            
 
     dc.renderAll();
     
     var map = whereChart.map();
-
+    map.scrollWheelZoom.disable();
     zoomToGeom(geom);
     
     var g = d3.selectAll('#rc-3W-who').select('svg').append('g');
