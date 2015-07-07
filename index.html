@@ -42,26 +42,31 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <p>Map</p>
+                        <p>Map | Current filter: <span id="mapfilter"></span></span></p>
                         <div class="rc-3w-viz" id="rc-3W-where"></div>                            
                     </div>
                 </div>
                 <div class="row margintop20">                    
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div id="rc-3W-who" class="rc-3w-viz">
-                            <p>Who</p>
+                            <p>Who | Current filter: <span class="filter"></span></span></p>
                         </div>                                
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div id="rc-3W-what" class="rc-3w-viz">
-                            <p>What</p>
+                            <p>What | Current filter: <span class="filter"></span></span></p>
                         </div>                                
                     </div>                             
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="rc-3w-viz" id="rc-3W-status">
-                            <p>Confirmed at VDC level (If no it is likely the PNS only confirmed at district level)</p>
+                            <p>VDCs confirmed | Current filter: <span class="filter"></span></span></p>
                         </div>                              
                     </div>
+                    <div class="col-sm-3">
+                        <div class="rc-3w-viz" id="rc-3W-districtlevel">
+                            <p>District level stated only | Current filter: <span class="filter"></span></span></p>
+                        </div>                              
+                    </div>                    
                 </div>
             <div class="row">
                 <div class="col-md-12">
@@ -73,6 +78,7 @@
                           <th>Organisation</th>
                           <th>VDC</th>
                           <th>Confirmed at VDC level</th>
+                          <th>Stated at District level</th>
                         </tr>
                       </thead>
                     </table>
