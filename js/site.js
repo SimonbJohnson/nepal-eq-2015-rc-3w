@@ -9,11 +9,13 @@ var config = {
     whereFieldName:"#adm3+code",
     statusFieldName:"#indicator",
     districtlevelFieldName:"#meta+vdc_list",
+    severityFieldName:"#severity",
     geo:"data/nepal_adm3.json",
     joinAttribute:"HLCIT_CODE",
     nameAttribute:"DISTRICT",
     color:"#03a9f4",
-    colors:["#DDDDDD","#E1F5FE","#81D4FA","#29B6F6","#039BE5","#0277BD"]
+    colors:["#DDDDDD","#E1F5FE","#81D4FA","#29B6F6","#039BE5","#0277BD"],
+    colors2:["#DDDDDD","#FFF8E1","#FFECB3","#FFD54F","#FFC107","#FFA000"]
 };
 
 //function to generate the 3W component
@@ -31,6 +33,7 @@ function generate3WComponent(config,data,geom){
     var whatChart = dc.rowChart('#rc-3W-what');
     var statusChart = dc.pieChart('#rc-3W-status');
     var districtlevelChart = dc.pieChart('#rc-3W-districtlevel');
+    var severityChart = dc.pieChart('#rc-3W-severitylevel');
     var whereChart = dc.leafletChoroplethChart('#rc-3W-where');
 
     var cf = crossfilter(data);
@@ -44,12 +47,14 @@ function generate3WComponent(config,data,geom){
                                                                 return "No"
                                                             }
                                                         });
+    var severityDimension = cf.dimension(function(d){ return d[config.severityFieldName]; });
     var whereDimension = cf.dimension(function(d){ return d[config.whereFieldName]; });
     
     var whoGroup = whoDimension.group();
     var whatGroup = whatDimension.group();
     var statusGroup = statusDimension.group();
     var districtlevelGroup = districtlevelDimension.group();
+    var severityGroup = severityDimension.group();
     var whereGroup = whereDimension.group();
     var all = cf.groupAll();
 
@@ -88,6 +93,13 @@ function generate3WComponent(config,data,geom){
             .group(districtlevelGroup)
             .colors([config.color,'#06b9f9'])
             .colorAccessor(function(d, i){return i;}); 
+
+    severityChart.width($('#rc-3W-severitylevel').width()).height(170)
+            .dimension(severityDimension)
+            .group(severityGroup)
+            .colors(config.colors2)
+            .colorDomain([0, 5])
+            .colorAccessor(function(d, i){return i;});             
 
     dc.dataCount('#count-info')
             .dimension(cf)
